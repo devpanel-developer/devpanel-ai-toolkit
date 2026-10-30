@@ -1,0 +1,23 @@
+# Secrets and local environment: never commit credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Customer data must never land in this repository
+*.sql
+*.sql.gz
+*.sql.tgz
+*.dump
+dumps/
+
+# Execution records (normally stored outside the repo, see exec-record.mjs)
+.devpanel-runs/
+
+# Installer leftovers and editor/OS noise
+*.bak-*
+.*.staging.*
+node_modules/
+.DS_Store
+*.swp

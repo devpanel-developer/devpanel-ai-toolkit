@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "productionTemplatePublished": false,
+  "evidenceLevels": {
+    "platform-source": "Behaviour confirmed for the DevPanel platform.",
+    "observed": "Present in a DevPanel-maintained Drupal repository (drupal-forge 023fa358); not confirmed against the deployment playbook or a successful deployment record.",
+    "inspection": "Derived from the customer's own codebase."
+  },
+  "items": [
+    {
+      "path": ".devpanel/config.yml",
+      "kind": "file",
+      "evidence": "platform-source",
+      "required": false,
+      "description": "DevPanel reads and validates this file when present (git hook commands). Absent file is valid.",
+      "source": "DevPanel platform: config file validation"
+    },
+    {
+      "path": ".devpanel/re-config.sh",
+      "kind": "file",
+      "evidence": "observed",
+      "required": "unknown",
+      "description": "DevPanel selects a run script named re-config.sh for deployments from Git (isFromGit). Its location under .devpanel/ and whether the repository must provide it is not verified.",
+      "source": "DevPanel platform: run script selection; drupal-forge/.devpanel/re-config.sh"
+    },
+    {
+      "path": ".devpanel/init.sh",
+      "kind": "file",
+      "evidence": "observed",
+      "required": "unknown",
+      "description": "DevPanel selects a run script named init.sh when not deploying from Git, a copy or a database URL. Location and contract not verified.",
+      "source": "DevPanel platform: run script selection; drupal-forge/.devpanel/init.sh"
+    },
+    {
+      "path": ".devpanel/drupal-settings.php",
+      "kind": "file",
+      "evidence": "observed",
+      "required": "unknown",
+      "description": "Settings file copied to sites/default/settings.php by the observed scripts.",
+      "source": "drupal-forge/.devpanel/"
+    },
+    {
+      "path": ".devpanel/custom_package_installer.sh",
+      "kind": "file",
+      "evidence": "observed",
+      "required": "unknown",
+      "description": "Installs extra OS packages in the observed repository.",
+      "source": "drupal-forge/.devpanel/"
+    },
+    {
+      "path": ".devpanel/cron_scripts/",
+      "kind": "directory",
+      "evidence": "observed",
+      "required": "unknown",
+      "description": "Cron scripts in the observed repository.",
+      "source": "drupal-forge/.devpanel/"
+    },
+    {
+      "path": "composer.json",
+      "kind": "file",
+      "evidence": "inspection",
+      "required": true,
+      "description": "Composer-managed Drupal project; determines core version, PHP constraint and web root.",
+      "source": "toolkit scope"
+    }
+  ],
+  "observedScriptEnvironment": ["APP_ROOT", "WEB_ROOT", "DB_HOST", "DB_PORT", "DB_USER", "DB_PASSWORD", "DB_NAME"],
+  "missingEvidence": [
+    "The deployment playbook that executes the run script (path resolution, working directory, environment, failure handling) is not available locally.",
+    "No record of a successful DevPanel deployment of a customer Drupal repository with a known .devpanel layout.",
+    "Whether DevPanel container images supply default scripts when the repository has none."
+  ]
+}

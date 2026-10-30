@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "sources": "Verified DevPanel platform and DevPanel MCP behaviour; see docs/EVIDENCE.md.",
+  "capacityTiers": [
+    { "name": "over_commit", "cpu": "0", "memory": "0GB", "listedByDevPanel": true, "note": "Burstable; DevPanel forces capacityLimit=large_1." },
+    { "name": "tiny", "cpu": "0.125", "memory": "0.5GB", "listedByDevPanel": true },
+    { "name": "micro", "cpu": "0.25", "memory": "0.5GB", "listedByDevPanel": true },
+    { "name": "micro_x", "cpu": "0.25", "memory": "1GB", "listedByDevPanel": true },
+    { "name": "small_1", "cpu": "0.5", "memory": "1GB", "listedByDevPanel": true },
+    { "name": "small_2", "cpu": "0.5", "memory": "2GB", "listedByDevPanel": true, "note": "Used by the tested Drupal CMS deployment." },
+    { "name": "medium_1", "cpu": "1", "memory": "2GB", "listedByDevPanel": true },
+    { "name": "medium_2", "cpu": "1", "memory": "4GB", "listedByDevPanel": true },
+    { "name": "large_1", "cpu": "2", "memory": "4GB", "listedByDevPanel": false },
+    { "name": "large_2", "cpu": "2", "memory": "8GB", "listedByDevPanel": false },
+    { "name": "xlarge_1", "cpu": "4", "memory": "8GB", "listedByDevPanel": false },
+    { "name": "xlarge_2", "cpu": "4", "memory": "16GB", "listedByDevPanel": false }
+  ],
+  "unlistedTierNote": "large_* and xlarge_* are defined by DevPanel and accepted by the MCP upgrade schema, but DevPanel's capacity listing (GET /applications/capacities) does not offer them. Use only after the user confirms their workspace plan allows them.",
+  "phpImages": {
+    "variants": ["base", "secure", "advance"],
+    "versions": {
+      "7.4": ["devpanel/php:7.4-base", "devpanel/php:7.4-secure", "devpanel/php:7.4-advance", "devpanel/php:7.4-apache"],
+      "8.0": ["devpanel/php:8.0-base", "devpanel/php:8.0-secure", "devpanel/php:8.0-advance"],
+      "8.1": ["devpanel/php:8.1-base", "devpanel/php:8.1-secure", "devpanel/php:8.1-advance"],
+      "8.2": ["devpanel/php:8.2-base", "devpanel/php:8.2-secure", "devpanel/php:8.2-advance"],
+      "8.3": ["devpanel/php:8.3-base", "devpanel/php:8.3-secure", "devpanel/php:8.3-advance"],
+      "8.4": ["devpanel/php:8.4-base", "devpanel/php:8.4-secure", "devpanel/php:8.4-advance"],
+      "8.5": ["devpanel/php:8.5-base", "devpanel/php:8.5-secure", "devpanel/php:8.5-advance"]
+    }
+  },
+  "projectTypeDefaultImage": {
+    "lamp": "devpanel/php:8.0-base",
+    "drupal7_v2": "devpanel/php:8.2-base",
+    "drupal8_v2": "devpanel/php:7.4-base",
+    "drupal9_v2": "devpanel/php:8.0-base",
+    "drupal10_v2": "devpanel/php:8.2-base",
+    "drupal11_v2": "devpanel/php:8.3-base"
+  },
+  "drupalPhpMinimum": {
+    "note": "Drupal upstream minimum PHP per major version (drupal.org system requirements).",
+    "10": "8.1",
+    "11": "8.3"
+  },
+  "mysql": {
+    "perApplication": false,
+    "scope": "environment",
+    "explanation": "DevPanel provisions the database from the workspace's environment (cluster) settings dbEngine/dbEngineVersion. No MCP tool or activation field selects or reports a MySQL version per application.",
+    "knownEngineVersions": ["5.6", "5.7", "8.0.21", "8.0.36", "8.0.42", "8.4.9", "8", "8.4"],
+    "resolution": "Ask the user to confirm the MySQL version of the workspace's cluster in the DevPanel UI, or choose a workspace on a cluster that provides it. Record the confirmed version in the execution record; never pass it as an MCP argument."
+  },
+  "activationDefaults": {
+    "note": "Generic, stack-unaware MCP defaults applied when a field is omitted. capacityLimit is NOT flagged by the plan warning, so always pass it.",
+    "containerImage": "devpanel/php:8.3-base-rc",
+    "capacity": "micro",
+    "capacityLimit": "micro",
+    "appRoot": "/var/www/html",
+    "webRoot": "/var/www/html/web",
+    "storage": 5,
+    "groupType": "on-demand"
+  },
+  "testedExample": {
+    "note": "Tested Drupal CMS deployment in the user's DevPanel instance. Example only, not a default.",
+    "containerImage": "drupalforge/drupal_cms:main",
+    "capacity": "small_2",
+    "webRoot": "explicit (record the value used)"
+  }
+}
