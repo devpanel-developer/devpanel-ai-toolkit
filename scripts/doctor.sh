@@ -111,7 +111,7 @@ if [[ ${#live[@]} -gt 0 ]]; then
 else
   info "not checked from this shell: Claude Code's MCP login is not available to scripts."
   info "Either ask Claude: \"check my DevPanel toolkit setup\" (devpanel_whoami, devpanel_list_workspaces, devpanel_list_git_owners),"
-  info "or re-run with: --live --server-url <DevPanel MCP URL>"
+  info "or re-run with: --live --server-url https://mcp.devpanel.com/mcp"
 fi
 
 printf '\nSummary: %d failure(s), %d warning(s)\n' "$fails" "$warns"

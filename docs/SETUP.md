@@ -31,7 +31,7 @@ Restart Claude Code (or start a new session) so it loads the skill.
 If the `devpanel` MCP server is not configured yet:
 
 ```bash
-installers/install-claude-code.sh --scope user --configure-mcp <DevPanel MCP URL>
+installers/install-claude-code.sh --scope user --configure-mcp https://mcp.devpanel.com/mcp
 ```
 
 This runs `claude mcp add --transport http --scope user devpanel <URL>` and never changes an existing `devpanel` entry. Then in Claude Code run `/mcp`, select `devpanel` and complete the browser sign-in. `claude mcp get devpanel` should show `Status: ✔ Connected`.
@@ -43,7 +43,7 @@ In Claude Code: *"Check my DevPanel toolkit setup."* The skill calls `devpanel_w
 From a terminal instead (separate sign-in; the helper cannot use Claude Code's MCP session):
 
 ```bash
-node scripts/dp-mcp-helper.mjs check --server-url <DevPanel MCP URL>
+node scripts/dp-mcp-helper.mjs check --server-url https://mcp.devpanel.com/mcp
 ```
 
 ## 5. GitHub CLI
@@ -60,7 +60,7 @@ skills/devpanel-project-lifecycle/scripts/gh-branch.sh access OWNER/REPO   # opt
 2. Save it in DevPanel, **either**:
    - **Helper** (in your own terminal, not through Claude):
      ```bash
-     node scripts/dp-mcp-helper.mjs set-git-token --server-url <DevPanel MCP URL>
+     node scripts/dp-mcp-helper.mjs set-git-token --server-url https://mcp.devpanel.com/mcp
      ```
      It signs in to DevPanel MCP itself (browser OAuth), shows the DevPanel identity for you to confirm, reads the token with hidden input, checks with GitHub that it is a classic token with `repo` scope owned by the GitHub username, then calls `devpanel_set_git_token` and verifies with `devpanel_list_git_owners`. The token is held only in the helper's memory; it is never an argument, environment variable, file or log line. The helper refuses to run inside a Claude Code session.
    - **DevPanel UI** (tested baseline): save the token and GitHub username in your DevPanel account's Git settings.
@@ -72,7 +72,7 @@ Never paste a token into the Claude conversation. If that happens, revoke it on 
 
 ```bash
 scripts/doctor.sh                                         # local checks (A, skill, B status, C)
-scripts/doctor.sh --repo OWNER/REPO --live --server-url <DevPanel MCP URL>   # plus B identity and D via the helper
+scripts/doctor.sh --repo OWNER/REPO --live --server-url https://mcp.devpanel.com/mcp   # plus B identity and D via the helper
 ```
 
 `doctor.sh` reports installed-but-not-configured states separately (for example "configured but not authenticated"). Fix the reported step and re-run it, or resume `setup.sh --from-step N`; the skill does not need to be reinstalled.

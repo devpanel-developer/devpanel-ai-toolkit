@@ -2,7 +2,7 @@
 # Guided setup for the DevPanel AI Toolkit in the required order. Each step checks the
 # current state first and skips what is already done, so it can be re-run to resume.
 #
-#   setup.sh --scope user|project [--project-dir DIR] [--mcp-url URL] [--mcp-name NAME] [--from-step N]
+#   setup.sh --scope user|project [--project-dir DIR] [--mcp-url URL (default https://mcp.devpanel.com/mcp)] [--mcp-name NAME] [--from-step N]
 #
 #   1 Claude Code and dependencies      5 GitHub CLI authentication
 #   2 Install the skill                 6 GitHub PAT classic saved in DevPanel
@@ -14,7 +14,8 @@
 set -uo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-scope='' project_dir=$PWD mcp_url='' mcp_name=devpanel from=1
+DEFAULT_MCP_URL=https://mcp.devpanel.com/mcp
+scope='' project_dir=$PWD mcp_url=$DEFAULT_MCP_URL mcp_name=devpanel from=1
 while [[ $# -gt 0 ]]; do
   case $1 in
     --scope) scope=${2:-}; shift 2 ;;
@@ -61,8 +62,20 @@ fi
 cur=3
 if [[ $from -le 3 ]]; then
   step 3 "DevPanel MCP server \"$mcp_name\""
-  if [[ -z $(mcp_url_configured) ]] && ! (cd "$project_dir" && claude mcp get "$mcp_name" >/dev/null 2>&1); then
-    [[ -n $mcp_url ]] || mcp_url=$(ask 'DevPanel MCP URL (as provided by DevPanel, e.g. https://mcp.devpanel.com/mcp):')
+  [[ -n $mcp_url ]] || mcp_url=$DEFAULT_MCP_URL
+  current=$(mcp_url_configured)
+  if [[ -n $current && ${current%/} != "${mcp_url%/}" ]]; then
+    echo "\"$mcp_name\" is registered with $current, expected $mcp_url."
+    if [[ $(ask "Replace it with $mcp_url? You will sign in again with /mcp. [y/N]") =~ ^[yY] ]]; then
+      mcp_scope=$([[ $scope == user ]] && echo user || echo local)
+      (cd "$project_dir" && claude mcp remove "$mcp_name" -s "$mcp_scope" >/dev/null 2>&1) \
+        || { echo "Could not remove it from the $mcp_scope scope. Remove it yourself (claude mcp remove $mcp_name -s <scope>) and re-run with --from-step 3."; exit 1; }
+      current=''
+    else
+      echo "Keeping $current."
+    fi
+  fi
+  if [[ -z $current ]] && ! (cd "$project_dir" && claude mcp get "$mcp_name" >/dev/null 2>&1); then
     "$ROOT/installers/install-claude-code.sh" --scope "$scope" --project-dir "$project_dir" --configure-mcp "$mcp_url" --mcp-name "$mcp_name" >/dev/null \
       || { echo "Could not register the MCP server. Re-run with --from-step 3."; exit 1; }
     echo "Registered \"$mcp_name\" -> $mcp_url"
