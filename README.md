@@ -45,7 +45,7 @@ tests/                               automated checks (node --test tests/*.test.
 One command, in your own terminal (macOS, Linux or WSL):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/devpanel-developer/devpanel-ai-toolkit/main/install.sh | bash -s -- --mcp-url https://<devpanel-mcp-host>/mcp
+curl -fsSL https://raw.githubusercontent.com/devpanel-developer/devpanel-ai-toolkit/main/install.sh | bash
 ```
 
 `install.sh` checks git, curl, Node.js 18+, GitHub CLI and Claude Code and offers to install what is missing (it asks before each install; `--yes` skips the questions), clones or updates the toolkit in `~/.local/share/dp-ai-toolkit` (`--dir`), then runs the guided setup (`scripts/setup.sh`). The steps only you can do stay manual and are prompted in order: Claude Code `/login`, DevPanel sign-in via `/mcp`, `gh auth login`, and creating the GitHub PAT classic. Re-run it at any time; finished steps are skipped.
@@ -55,7 +55,7 @@ curl -fsSL https://raw.githubusercontent.com/devpanel-developer/devpanel-ai-tool
 | `--ref REF` | branch, tag or commit to install (default `main`) |
 | `--dir DIR` | where the toolkit is cloned (ignored when run from a checkout) |
 | `--scope user\|project`, `--project-dir DIR` | skill scope (default `user`) |
-| `--mcp-url URL`, `--mcp-name NAME` | DevPanel MCP server to register (default name `devpanel`) |
+| `--mcp-url URL`, `--mcp-name NAME` | DevPanel MCP server to register (default `https://mcp.devpanel.com/mcp`, name `devpanel`) |
 | `--yes` | install missing prerequisites without asking |
 | `--dry-run` | show what would happen; change nothing |
 
@@ -65,7 +65,7 @@ From a checkout, `./install.sh` does the same with that checkout. Manual equival
 git clone https://github.com/devpanel-developer/devpanel-ai-toolkit.git dp-ai-toolkit && cd dp-ai-toolkit
 installers/install-claude-code.sh --scope user
 # optionally register the DevPanel MCP server if it is not configured yet:
-installers/install-claude-code.sh --scope user --configure-mcp https://<devpanel-mcp-host>/mcp
+installers/install-claude-code.sh --scope user --configure-mcp https://mcp.devpanel.com/mcp
 ```
 
 | `install-claude-code.sh` option | Effect |
@@ -83,7 +83,7 @@ The installer copies the skill, records a checksum manifest (`.dp-ai-toolkit-man
 Four separate credentials: Claude Code login, DevPanel MCP authentication, GitHub CLI authentication, and the GitHub PAT classic stored in DevPanel. Follow [docs/SETUP.md](docs/SETUP.md), or run the guided, resumable script:
 
 ```bash
-scripts/setup.sh --scope user --mcp-url https://<devpanel-mcp-host>/mcp
+scripts/setup.sh --scope user --mcp-url https://mcp.devpanel.com/mcp
 ```
 
 Order: (1) Claude Code and dependencies → (2) install skill → (3) DevPanel MCP + `/mcp` sign-in → (4) `devpanel_whoami` and workspace access → (5) `gh auth login` → (6) PAT classic in DevPanel → (7) diagnostics.
@@ -91,7 +91,7 @@ Order: (1) Claude Code and dependencies → (2) install skill → (3) DevPanel M
 PAT classic creation on GitHub is manual. To save it in DevPanel, run the helper **in your own terminal** (it has its own DevPanel MCP sign-in, reads the token with hidden input and sends it directly to `devpanel_set_git_token`):
 
 ```bash
-node scripts/dp-mcp-helper.mjs set-git-token --server-url https://<devpanel-mcp-host>/mcp
+node scripts/dp-mcp-helper.mjs set-git-token --server-url https://mcp.devpanel.com/mcp
 ```
 
 or save it in the DevPanel UI (the tested baseline). Never paste tokens into the Claude conversation. The toolkit never copies `gh` credentials into DevPanel.
@@ -110,7 +110,7 @@ In Claude Code (see [examples/requests.md](examples/requests.md) for more):
 ## Diagnostics and troubleshooting
 
 ```bash
-scripts/doctor.sh [--repo OWNER/REPO] [--live --server-url https://<devpanel-mcp-host>/mcp]
+scripts/doctor.sh [--repo OWNER/REPO] [--live --server-url https://mcp.devpanel.com/mcp]
 ```
 
 | Symptom | Cause | Fix |

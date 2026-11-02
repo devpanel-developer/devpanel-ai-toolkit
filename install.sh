@@ -4,7 +4,9 @@
 #   install.sh [--ref REF] [--dir DIR] [--scope user|project] [--project-dir DIR]
 #              [--mcp-url URL] [--mcp-name NAME] [--yes] [--dry-run]
 #
-# Also works piped:  curl -fsSL https://raw.githubusercontent.com/devpanel-developer/devpanel-ai-toolkit/main/install.sh | bash -s -- --mcp-url URL
+# DevPanel MCP URL defaults to https://mcp.devpanel.com/mcp.
+#
+# Also works piped:  curl -fsSL https://raw.githubusercontent.com/devpanel-developer/devpanel-ai-toolkit/main/install.sh | bash
 #
 #   1. Checks git, curl, Node.js 18+, GitHub CLI and Claude Code; offers to install what is missing
 #      (asks before each install unless --yes).
@@ -28,7 +30,7 @@ while [[ $# -gt 0 ]]; do
     --mcp-name) mcp_name=${2:-}; shift 2 ;;
     --yes|-y) yes=1; shift ;;
     --dry-run) dry=1; shift ;;
-    -h|--help) sed -n '2,17p' "${BASH_SOURCE[0]:-$0}" 2>/dev/null | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,18p' "${BASH_SOURCE[0]:-$0}" 2>/dev/null | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown option $1 (see --help)" >&2; exit 64 ;;
   esac
 done
