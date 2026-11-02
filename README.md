@@ -52,7 +52,7 @@ curl -fsSL https://raw.githubusercontent.com/devpanel-developer/devpanel-ai-tool
 
 | `install.sh` option | Effect |
 |---|---|
-| `--ref REF` | branch, tag or commit to install (default `main`) |
+| `--ref REF` | branch, tag or commit to install (default `main`; e.g. `v0.2.0` for a released version, see [CHANGELOG.md](CHANGELOG.md)) |
 | `--dir DIR` | where the toolkit is cloned (ignored when run from a checkout) |
 | `--scope user\|project`, `--project-dir DIR` | skill scope (default `user`) |
 | `--mcp-url URL`, `--mcp-name NAME` | DevPanel MCP server to register (default `https://mcp.devpanel.com/mcp`, name `devpanel`) |

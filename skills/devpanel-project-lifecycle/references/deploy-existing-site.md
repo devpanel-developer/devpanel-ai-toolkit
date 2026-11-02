@@ -8,7 +8,7 @@ The toolkit has **no verified production `.devpanel` template** (see `devpanel-p
 
 Therefore:
 - Do not create `.devpanel/` files from memory or from the observed example as if they were requirements.
-- The default way to add them is `add-devpanel-config.md`: Composer pulls them from the Drupal Forge starter template at a pinned commit, plus one `settings.php` include. Say that this setup is not yet verified by a deployment.
+- The default way to add them is `add-devpanel-config.md`: Composer pulls them from the Drupal Forge starter template at a pinned commit, plus one `settings.php` include. Say that it is verified locally but not yet on a DevPanel deployment.
 - If the user supplies another verified reference (a repository/catalog that deploys successfully on their DevPanel), you may compare against it instead, with authorization.
 
 ## Procedure

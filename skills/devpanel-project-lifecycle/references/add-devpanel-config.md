@@ -2,7 +2,7 @@
 
 The toolkit does not keep its own copy of the `.devpanel` files. The customer's site pulls them with Composer from the Drupal Forge starter template, pinned to one commit, through `drupal/core-composer-scaffold`. Used by `deploy-existing-site.md` step 4–5.
 
-**Status: unverified.** Built from the starter template's source; not yet run against a deployed DevPanel application. Report it as such until a deployment record exists.
+**Status: verified locally (2026-11-02); not yet verified on a DevPanel deployment.** On a Composer-managed Drupal site: the pinned inline package resolves, scaffold copies the files, the hook leaves the scripts executable, the `settings.php` include is added exactly once (also after re-running scaffold), `settings.php` passes `php -l`, and with DevPanel-style environment variables in DDEV (settings management off) the site connects to its database through `settings.devpanel.php` and installs. Say that DevPanel deployment behaviour (below) is still unverified.
 
 ## Source
 
@@ -118,8 +118,9 @@ grep -c 'settings.devpanel.php' web/sites/default/settings.php   # exactly 1
 
 ## To verify on the first real deployment
 
-1. The scaffold step copies the files and the hook leaves the scripts executable (`ls -l .devpanel` in the VS Code terminal).
-2. The deployment ran `re-config.sh` (activity log) and the site reaches `install_required` (no data yet) instead of a database connection error.
-3. Whether DevPanel needs `init.sh` for Git deployments.
+Done locally: files copied, scripts executable, single `settings.php` include, database connection through `settings.devpanel.php`. Still open on DevPanel:
 
-Record the outcome; once all three pass, change the status line at the top of this file and in `templates/drupal/README.md`.
+1. The deployment ran `re-config.sh` (activity log) and the site reaches `install_required` (no data yet) instead of a database connection error.
+2. Whether DevPanel needs `init.sh` for Git deployments.
+
+Record the outcome; once both pass, change the status line at the top of this file and in `templates/drupal/README.md`.
