@@ -30,7 +30,7 @@ while [[ $# -gt 0 ]]; do
     --mcp-name) mcp_name=${2:-}; shift 2 ;;
     --yes|-y) yes=1; shift ;;
     --dry-run) dry=1; shift ;;
-    -h|--help) sed -n '2,18p' "${BASH_SOURCE[0]:-$0}" 2>/dev/null | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,17p' "${BASH_SOURCE[0]:-$0}" 2>/dev/null | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown option $1 (see --help)" >&2; exit 64 ;;
   esac
 done
