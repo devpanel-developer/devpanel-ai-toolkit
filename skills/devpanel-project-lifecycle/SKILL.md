@@ -17,7 +17,7 @@ Read `references/execution-and-verification.md` first for every workflow, then t
 | New project from an existing GitHub repository | `references/create-project-from-repository.md` |
 | Environment for a branch of an existing project (new or existing branch) | `references/create-branch-environment.md` |
 | Copy database and files from environment A to B | `references/sync-environment-data.md` |
-| Prepare an existing customer Drupal site for DevPanel | `references/deploy-existing-site.md` |
+| Prepare an existing customer Drupal site for DevPanel | `references/deploy-existing-site.md` (adds `.devpanel` via `references/add-devpanel-config.md`) |
 | Check the toolkit setup / credentials (read-only) | `references/execution-and-verification.md` §1 and §9 only; no plans |
 
 `references/devpanel-project-requirements.md` holds the verified server-configuration mappings (CPU/memory tiers, PHP images, MySQL) and Drupal file requirements. Read it before collecting server configuration or touching customer source.

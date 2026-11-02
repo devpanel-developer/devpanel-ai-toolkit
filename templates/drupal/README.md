@@ -4,6 +4,8 @@ This directory is the canonical location for toolkit-managed Drupal configuratio
 
 **No production template is published.** `requirements.json` records what is known, at which evidence level, and what is missing. `inspect-drupal-source.mjs` uses it to report on a customer codebase.
 
+**Source of `.devpanel` files:** the toolkit keeps no copy. Customer sites pull them with Composer from `drupalforge/starter_template` at a pinned commit; see `skills/devpanel-project-lifecycle/references/add-devpanel-config.md` (unverified until a first deployment record).
+
 ## What is verified
 
 Confirmed DevPanel platform behaviour:

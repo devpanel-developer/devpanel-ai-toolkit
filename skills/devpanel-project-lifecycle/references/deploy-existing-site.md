@@ -8,8 +8,8 @@ The toolkit has **no verified production `.devpanel` template** (see `devpanel-p
 
 Therefore:
 - Do not create `.devpanel/` files from memory or from the observed example as if they were requirements.
-- If the user supplies a verified reference (a repository/catalog that deploys successfully on their DevPanel, e.g. the repository created by a Drupal CMS quickclone), you may compare against it and propose copying specific files, with authorization.
-- Otherwise, deploy the codebase as-is through the repository workflow and let the deployment logs show what is missing.
+- The default way to add them is `add-devpanel-config.md`: Composer pulls them from the Drupal Forge starter template at a pinned commit, plus one `settings.php` include. Say that this setup is not yet verified by a deployment.
+- If the user supplies another verified reference (a repository/catalog that deploys successfully on their DevPanel), you may compare against it instead, with authorization.
 
 ## Procedure
 
@@ -23,7 +23,7 @@ Therefore:
    - No `composer.json` / non-Composer (tarball) Drupal, Drupal 7 or older, or unrecognised layout: outside the supported scope of this toolkit.
    - Risk findings (committed credentials in `settings.php`, `.env`, SQL dumps, `sites/*/files` in Git, `.devpanel/dumps/`): tell the user which paths; never print contents; never copy them anywhere.
    - Locked `drupal/core` requires a PHP version that no `devpanel/php` image offers.
-4. **Present the plan of changes**: which files would be added or changed and why, with evidence level for each. Existing customer files (`settings.php`, existing `.devpanel/`, CI, DDEV/Lando config) are preserved; changing any of them requires the user's explicit authorization for that file. Nothing is overwritten by default.
+4. **Present the plan of changes**: which files would be added or changed and why, with evidence level for each. The DevPanel configuration changes are those in `add-devpanel-config.md` (`composer.json`, `composer.lock`, `.devpanel/`, `settings.php` include). Existing customer files (`settings.php`, existing `.devpanel/`, CI, DDEV/Lando config) are preserved; changing any of them requires the user's explicit authorization for that file. Nothing is overwritten by default.
 5. **Apply authorized changes** on a branch, commit with a descriptive message, and push only after the user confirms the target repository and branch. Report the commit SHA.
 6. **Validate locally** what can be validated: re-run the inspector; `composer validate --no-check-publish` if Composer is available; `bash -n` on any added shell scripts. Say clearly that local checks do not prove DevPanel compatibility.
 7. **Deploy** with `create-project-from-repository.md`, using the inspector's web root, project type and PHP suggestion as the starting point for the user's server configuration choice.
