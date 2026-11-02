@@ -86,7 +86,7 @@ describe('repository hygiene', () => {
     assert.ok(description.length > 50 && description.length <= 1024, 'description length');
     assert.ok(skill.split('\n').length < 150, 'SKILL.md should stay concise');
     const refs = readdirSync(join(SKILL_DIR, 'references'));
-    assert.deepEqual(refs.sort(), ['create-branch-environment.md', 'create-project-from-repository.md', 'create-project-from-template.md', 'deploy-existing-site.md', 'devpanel-project-requirements.md', 'execution-and-verification.md', 'sync-environment-data.md']);
+    assert.deepEqual(refs.sort(), ['add-devpanel-config.md', 'create-branch-environment.md', 'create-project-from-repository.md', 'create-project-from-template.md', 'deploy-existing-site.md', 'devpanel-project-requirements.md', 'execution-and-verification.md', 'sync-environment-data.md']);
     for (const r of refs) assert.ok(skill.includes(`references/${r}`), `SKILL.md does not route to ${r}`);
   });
 
