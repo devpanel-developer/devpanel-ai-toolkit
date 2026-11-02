@@ -12,7 +12,9 @@ Supported (Claude Code only):
 
 Every DevPanel change is an MCP plan that you approve by answering `APPROVE` or `REJECT` to the plan text Claude shows you verbatim.
 
-Deferred: Codex and OpenCode installers, WordPress and generic templates, local database/files import.
+Database/files of an existing site are imported manually by a person: [docs/MANUAL-DATA-IMPORT.md](docs/MANUAL-DATA-IMPORT.md).
+
+Deferred: Codex and OpenCode installers, WordPress and generic templates, automated database/files import.
 
 ## Layout
 

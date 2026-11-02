@@ -31,4 +31,10 @@ Therefore:
 
 ## Data migration (separate)
 
-Deploying source does not migrate the site's database or files. The DevPanel MCP documents no upload/import of a local database dump or files archive; backup download and restore apply only to backups the application itself made. Report this as outstanding work. Do not invent an import path (for example committing dumps into the repository for a deploy script to import).
+Deploying source does not migrate the site's database or files. The DevPanel MCP documents no upload/import of a local database dump or files archive; backup download and restore apply only to backups the application itself made. Do not invent an automated import path (for example committing dumps into the repository, baking them into an image, or placing them in `.devpanel/dumps/`).
+
+The supported path is a **manual import by the user** in the application's VS Code terminal, following `docs/MANUAL-DATA-IMPORT.md` in the toolkit repository (public files go to `<webRoot>/sites/default/files`):
+
+1. After deployment, check the application `storage` against the files size the user reports (needs ≥ 2 × files + dump); propose an upgrade plan if it is too small.
+2. Give the user the guide and the application URL. Never ask for, accept or relay hosting credentials, dumps or download URLs.
+3. When the user says the data is imported, verify (`execution-and-verification.md` §5) and read HTTP logs on failure. Record "data imported manually by user" in the execution record.
