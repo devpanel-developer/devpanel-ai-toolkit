@@ -21,7 +21,8 @@ Deferred: Codex and OpenCode installers, WordPress and generic templates, automa
 ```text
 skills/devpanel-project-lifecycle/   the skill: SKILL.md, references/ (7 workflows), scripts/, assets/
 templates/drupal/                    Drupal requirements manifest and evidence status (installed into the skill)
-installers/install-claude-code.sh    installer (explicit scope, repeatable, protects existing files)
+install.sh                           one-command install: prerequisites, clone/update, guided setup
+installers/install-claude-code.sh    skill installer (explicit scope, repeatable, protects existing files)
 scripts/setup.sh                     guided setup in the required order
 scripts/doctor.sh                    diagnostics
 scripts/dp-mcp-helper.mjs            direct DevPanel MCP client: read-only check, PAT classic save
@@ -41,15 +42,33 @@ tests/                               automated checks (node --test tests/*.test.
 
 ## Installation
 
+One command, in your own terminal (macOS, Linux or WSL):
+
 ```bash
-git clone <this repository> dp-ai-toolkit && cd dp-ai-toolkit
-git checkout v$(cat VERSION)        # pin a released version (tags follow VERSION)
+curl -fsSL https://raw.githubusercontent.com/devpanel-developer/devpanel-ai-toolkit/main/install.sh | bash -s -- --mcp-url https://<devpanel-mcp-host>/mcp
+```
+
+`install.sh` checks git, curl, Node.js 18+, GitHub CLI and Claude Code and offers to install what is missing (it asks before each install; `--yes` skips the questions), clones or updates the toolkit in `~/.local/share/dp-ai-toolkit` (`--dir`), then runs the guided setup (`scripts/setup.sh`). The steps only you can do stay manual and are prompted in order: Claude Code `/login`, DevPanel sign-in via `/mcp`, `gh auth login`, and creating the GitHub PAT classic. Re-run it at any time; finished steps are skipped.
+
+| `install.sh` option | Effect |
+|---|---|
+| `--ref REF` | branch, tag or commit to install (default `main`) |
+| `--dir DIR` | where the toolkit is cloned (ignored when run from a checkout) |
+| `--scope user\|project`, `--project-dir DIR` | skill scope (default `user`) |
+| `--mcp-url URL`, `--mcp-name NAME` | DevPanel MCP server to register (default name `devpanel`) |
+| `--yes` | install missing prerequisites without asking |
+| `--dry-run` | show what would happen; change nothing |
+
+From a checkout, `./install.sh` does the same with that checkout. Manual equivalent, step by step:
+
+```bash
+git clone https://github.com/devpanel-developer/devpanel-ai-toolkit.git dp-ai-toolkit && cd dp-ai-toolkit
 installers/install-claude-code.sh --scope user
 # optionally register the DevPanel MCP server if it is not configured yet:
 installers/install-claude-code.sh --scope user --configure-mcp https://<devpanel-mcp-host>/mcp
 ```
 
-| Option | Effect |
+| `install-claude-code.sh` option | Effect |
 |---|---|
 | `--scope user` | `${CLAUDE_CONFIG_DIR:-~/.claude}/skills/devpanel-project-lifecycle` |
 | `--scope project [--project-dir DIR]` | `DIR/.claude/skills/devpanel-project-lifecycle` |
@@ -111,8 +130,8 @@ scripts/doctor.sh [--repo OWNER/REPO] [--live --server-url https://<devpanel-mcp
 ## Update
 
 ```bash
-cd dp-ai-toolkit && git fetch --tags && git checkout v<new version>
-installers/install-claude-code.sh --scope user      # updates an unmodified install in place
+curl -fsSL https://raw.githubusercontent.com/devpanel-developer/devpanel-ai-toolkit/main/install.sh | bash   # or: ./install.sh in your checkout after git pull
+# manual: git pull && installers/install-claude-code.sh --scope user   (updates an unmodified install in place)
 ```
 
 Locally modified skill files block the update; keep your changes elsewhere or re-run with `--force` (the old directory is kept as a backup).
