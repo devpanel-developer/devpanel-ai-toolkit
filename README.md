@@ -10,11 +10,13 @@ Supported (Claude Code only):
 - Copy database and files from one environment to another — only when you ask for it.
 - Inspect an existing Drupal codebase for DevPanel deployment (no `.devpanel` template is published yet; see [templates/drupal/README.md](templates/drupal/README.md)).
 
-Every DevPanel change is an MCP plan that you approve by answering `APPROVE` or `REJECT` to the plan text Claude shows you verbatim.
+DevPanel changes are MCP plans that you approve by answering `APPROVE` or `REJECT` to the plan text Claude shows you verbatim. A few harmless, easily reversed actions (starting a backup, resuming a paused application) run without that step; Claude says so before running one.
 
-Database/files of an existing site are imported manually by a person: [docs/MANUAL-DATA-IMPORT.md](docs/MANUAL-DATA-IMPORT.md).
+Database/files of an existing site are imported manually by a person: [docs/MANUAL-DATA-IMPORT.md](docs/MANUAL-DATA-IMPORT.md). The MCP server's own file import reads files on the machine the server runs on, so it does not reach your computer through the hosted server.
 
-Deferred: Codex and OpenCode installers, WordPress and generic templates, automated database/files import.
+Other DevPanel tasks (backup and restore, custom domains, Basic Auth and members, project secrets, resizing, pause and delete, running a command, troubleshooting) are not part of this skill. The DevPanel MCP server offers a guide for each as an MCP prompt: type `/` in Claude Code and pick e.g. `/mcp__devpanel__troubleshoot-site`.
+
+Deferred: Codex and OpenCode installers, WordPress and generic templates, automated database/files import through the hosted server.
 
 ## Layout
 
@@ -125,6 +127,7 @@ scripts/doctor.sh [--repo OWNER/REPO] [--live --server-url https://mcp.devpanel.
 | Job `SUCCESS` but HTTP 500 | Application error after deploy/copy | Claude reads activity and HTTP logs; see the report |
 | Branch missing from branch sync plan | DevPanel considers only the first 50 GitHub branches | Report; the branch environment cannot be created this way |
 | `Real CREATE is disabled` | DevPanel MCP server configuration | Contact the MCP operator |
+| Unknown tool `devpanel_plan_backup_application` or `devpanel_plan_unpause_application` | Installed skill is older than the MCP server (these became `devpanel_backup_application` / `devpanel_unpause_application`) | Update the toolkit (below) and start a new Claude Code session |
 | Helper: "Refusing to run set-git-token inside a Claude Code session" | Started from Claude's shell | Run it in a separate terminal |
 
 ## Update

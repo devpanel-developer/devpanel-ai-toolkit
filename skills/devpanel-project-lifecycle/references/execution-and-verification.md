@@ -16,7 +16,7 @@ If the DevPanel MCP tools are missing or return authentication errors, stop and 
 
 ## 2. Plan approval protocol
 
-DevPanel MCP mutates nothing until a human approves an immutable plan.
+A `devpanel_plan_*` tool mutates nothing: it returns an immutable plan that runs only after a human approves it. (The few change tools without `plan_` in the name are the exception; see the end of this section.)
 
 1. Gather every input first (plans expire; 15 minutes in the tested server). Respect the `expiresAt` returned with the plan.
 2. Create the plan with the relevant `devpanel_plan_*` tool. Read its `summary`, `target`, `steps` and `warnings`. If the plan's scope differs from what the user asked for (more applications, a different branch, a generic default you did not choose), stop and resolve that before asking for approval.
@@ -35,15 +35,17 @@ Rules:
 - `PLAN_REJECTED` / user answered `REJECT`: stop that branch of the workflow and report what was completed before it.
 - `EXECUTION_FAILED`: do not retry blindly. Read the plan (`devpanel_get_plan`), activities and logs, then reconcile (section 6).
 
+**Tools that run without approval.** `devpanel_backup_application`, `devpanel_unpause_application`, `devpanel_extend_application_expiry`, `devpanel_disable_code_server`, `devpanel_disable_phpmyadmin`, `devpanel_set_force_https` and `devpanel_configure_daily_backup` run as soon as they are called: each is undone with one call and loses no data. There is no plan text to show and no `APPROVE` to wait for. Before calling one, say what you are about to do; call it only when this skill's workflow needs it (backup before a sync) or the user asked for it. The result still contains a plan (approval method `NOT_REQUIRED`); record its ID like any other.
+
 ## 3. Application state decisions
 
-Read state with `devpanel_get_application` (workspaceId + application ID) before choosing an operation:
+Read state with `devpanel_get_application` (workspaceId + application ID; status, branch, hostname) and `devpanel_get_application_config` (`runtime.replicas`, image, tier, storage, paths) before choosing an operation:
 
 | State | Action |
 |---|---|
 | `UNDEPLOY_APPLICATION_SUCCESS` | Activation plan (`devpanel_plan_activate_application`) with user-selected configuration |
 | `DEPLOY_APPLICATION_SUCCESS`, `replicas` ≥ 1 | Running: reuse, no activation |
-| `DEPLOY_APPLICATION_SUCCESS`, `replicas` = 0 | Paused: `devpanel_plan_unpause_application` |
+| `DEPLOY_APPLICATION_SUCCESS`, `replicas` = 0 | Paused: tell the user, then `devpanel_unpause_application` (runs at once, no approval) |
 | `UPGRADING` or another in-progress status, or a `PENDING`/`IN_PROGRESS` activity | Monitor the existing activity first (section 4); do not submit another operation |
 | Any error status or unknown value | Inspect `devpanel_get_application_activities` and `devpanel_get_activity_logs`; report or resolve before proceeding |
 
@@ -53,8 +55,9 @@ Do not change runtime settings of an already running application as a side effec
 
 Execution results carry activity IDs (`activityId`, `cloneActivityId`), or the application's latest activity is visible in `devpanel_get_application_activities`.
 
-- Poll `devpanel_get_activity` until `status` is `SUCCESS`, `ERROR` or `CANCEL`.
-- Interval: about 20 seconds. Deadlines (observations, not guarantees): quickclone + deploy 20 minutes (the tested run took about 4), activation 15 minutes, data sync 30 minutes, backup 15 minutes. Never poll in a tight loop.
+- Call `devpanel_wait_for_activity` with the activity ID. It returns when the job is `SUCCESS`, `ERROR` or `CANCEL`, or after `timeoutSeconds` (default 120) with `done: false`; call it again to keep waiting. `done: true` only means the job ended: read `status`.
+- If the server does not offer that tool, poll `devpanel_get_activity` about every 20 seconds instead. Never poll in a tight loop.
+- Deadlines (observations, not guarantees): quickclone + deploy 20 minutes (the tested run took about 4), activation 15 minutes, data sync 30 minutes, backup 15 minutes.
 - On `ERROR`/`CANCEL`: read `devpanel_get_activity_logs` (raise `pageSize` for more lines) and report the failing step.
 - On deadline: the operation is **pending/unknown**, not failed. Record the activity ID, report it, and tell the user how to resume ("continue monitoring activity <id>"). Never submit a duplicate job because of a timeout.
 
@@ -63,12 +66,13 @@ Execution results carry activity IDs (`activityId`, `cloneActivityId`), or the a
 A `SUCCESS` activity or `DEPLOY_APPLICATION_SUCCESS` status does not prove the site works (a successful copy job still returned HTTP 500 in testing).
 
 1. Re-read the application: confirm project ID, `originBranch`, status, `replicas`, and `hostname` (the URL).
-2. Run `${CLAUDE_SKILL_DIR}/scripts/check-site.sh https://<hostname>`. Exit 0 = ready. It reports the final status code and known error markers (Drupal fatal error, database connection failure, installer redirect).
+2. `devpanel_get_application_status`: `health` must be `HEALTHY`. `DEGRADED`/`DOWN` come with the container reason in `issues` (`ImagePullBackOff`: wrong image; `OOMKilled`: tier too small; `CrashLoopBackOff`: read the container log). It reads pod state only and does not load the site, so continue with the next step either way.
+3. Run `${CLAUDE_SKILL_DIR}/scripts/check-site.sh https://<hostname>`. Exit 0 = ready. It reports the final status code and known error markers (Drupal fatal error, database connection failure, installer redirect).
    - `auth_protected` (401/403): the app is behind basic auth or access control; report that readiness was verified only up to the auth layer unless the user provides another check.
    - `install_required`: Drupal reached its installer; code is deployed but there is no installed site/database.
    - Status 5xx or `error_marker`: read `devpanel_get_http_logs` (container `php`) and the deploy activity logs.
    - New deployments can take a minute to serve after `SUCCESS`; `--retries 6 --interval 20` is reasonable once.
-3. Commit-level verification: record the branch SHA observed via `gh`. DevPanel MCP exposes no deployed-commit field, so report "deployed commit not verifiable via MCP" rather than claiming the SHA is live.
+4. Commit-level verification: record the branch SHA observed via `gh`. DevPanel MCP exposes no deployed-commit field, so report "deployed commit not verifiable via MCP" rather than claiming the SHA is live.
 
 ## 6. Retry and reconciliation
 
@@ -76,8 +80,8 @@ Before any retry, rebuild the picture from live state instead of from memory:
 
 - Branch: `gh-branch.sh lookup` (exists? which SHA?).
 - Applications: `devpanel_list_project_applications`; match on `originBranch`/`displayName`.
-- Plans: `devpanel_get_plan` for recorded plan IDs (status `SUCCEEDED`, `FAILED`, `STALE`, ...).
-- Activities: `devpanel_get_activity` for recorded activity IDs.
+- Plans: `devpanel_get_plan` for recorded plan IDs (status `SUCCEEDED`, `FAILED`, `STALE`, ...); `devpanel_list_plans` when an ID was not recorded. Plans live in server memory and are gone after a server restart, so a missing plan proves nothing: go by applications and activities.
+- Activities: `devpanel_get_activity` for recorded activity IDs; `devpanel_get_application_activities` for the application's recent jobs.
 
 Reuse what already matches the request. Resume monitoring pending activities. A resource that exists but does not match (branch at an unexpected SHA, an application on another branch with the requested name) needs the user's decision; never overwrite, reset or delete it.
 
@@ -107,8 +111,8 @@ Report, in this order, only what was observed:
 - Branch: name, created or reused, observed SHA.
 - Application: ID, URL, created or reused, status.
 - Server configuration selected and how it mapped to MCP fields (plus the user-confirmed MySQL version, which is cluster-level).
-- Verification: activity results, `check-site.sh` result, limits (auth-protected, deployed commit not verifiable).
-- Sync: source, target backup ID and component statuses, sync activity result — only if sync was requested.
+- Verification: activity results, `devpanel_get_application_status` health, `check-site.sh` result, limits (auth-protected, deployed commit not verifiable).
+- Sync: source, target backup ID and component statuses, sync activity result, source/target file counts — only if sync was requested.
 - Plans and activity IDs; partial completion; pending activities; the next actionable step.
 
 ## 9. Credentials and setup problems

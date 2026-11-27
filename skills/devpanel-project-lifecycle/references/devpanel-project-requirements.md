@@ -71,7 +71,7 @@ node "${CLAUDE_SKILL_DIR}/scripts/server-config.mjs" map --capacity small_2 --ph
 
 ### Reading an existing application as a reference
 
-`devpanel_get_application` returns `webRoot`, `staticFiles`, `originBranch`, status and replicas, but **not** container image, capacity or storage. Use it for paths; ask the user (or have them check the DevPanel UI) for the reference application's image and tier. Do not guess them.
+`devpanel_get_application_config` returns the reference application's `runtime` (`containerImage`, `capacity`, `capacityLimit`, `storageGi`, `groupType`, `replicas`) and `paths` (`appRoot`, `webRoot`, `staticFiles`). Show these to the user and offer to reuse them. A field reported as `null` is unknown: ask the user (or have them check the DevPanel UI) instead of guessing. It never returns passwords or database credentials, and it does not report the MySQL version.
 
 ## 2. Drupal source requirements for DevPanel
 

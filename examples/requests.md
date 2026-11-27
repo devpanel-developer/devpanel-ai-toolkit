@@ -22,25 +22,25 @@ Two plans follow, each approved separately: create application, then activate wi
 
 > In project acme-site, create an environment for branch feature/search, branched from develop.
 
-`gh-branch.sh lookup` → absent → `resolve-base develop` (SHA) → `create` → `devpanel_plan_sync_project_branches` (Claude points out if the plan would also create applications for other branches) → your configuration choice → activation plan → verification. No data is copied.
+`gh-branch.sh lookup` → absent → `resolve-base develop` (SHA) → `create` → `devpanel_plan_sync_project_branches` (Claude points out if the plan would also create applications for other branches) → your configuration choice (Claude reads an existing environment's image, tier and storage with `devpanel_get_application_config` and offers to reuse them) → activation plan → verification. No data is copied.
 
 ## Environment for an existing branch / existing application
 
 > Make sure the staging branch of acme-site has a running environment.
 
-Branch reused; if an application for `staging` exists it is reused; running → nothing to do; paused → unpause plan; undeployed → activation plan with your configuration.
+Branch reused; if an application for `staging` exists it is reused; running → nothing to do; paused → Claude tells you and resumes it (no approval step); undeployed → activation plan with your configuration, with the settings of an existing environment offered for reuse.
 
 ## Copy data between environments
 
 > Copy the database and files from main to feature/search in acme-site.
 
-Claude confirms source and target ("feature/search will be overwritten"), checks both are running with static files paths, backs up the target and waits for both backup parts to be `SUCCESS`, then shows the sync plan. Selective database-only or files-only copies are not available.
+Claude confirms source and target ("the feature/search database will be replaced; its files will be merged with main's"), checks both are running with static files paths, starts a backup of the target (no approval step) and waits for both backup parts to be `SUCCESS`, then shows the sync plan. The target is down while the database is copied. Selective database-only or files-only copies are not available.
 
 ## Existing Drupal codebase
 
 > Can ~/src/customer-site be deployed on DevPanel?
 
-`inspect-drupal-source.mjs` report: Drupal version, Composer layout, web root, suggested project type and PHP image, existing `.devpanel` files and their evidence level, other deployment config, risks (credentials, dumps) by path. Claude proposes changes only with evidence and your authorization, then uses the repository workflow. Data migration is reported as separate, unsupported work.
+`inspect-drupal-source.mjs` report: Drupal version, Composer layout, web root, suggested project type and PHP image, existing `.devpanel` files and their evidence level, other deployment config, risks (credentials, dumps) by path. Claude proposes changes only with evidence and your authorization, then uses the repository workflow. Data migration is a separate, manual step (`docs/MANUAL-DATA-IMPORT.md`).
 
 ## Setup check
 

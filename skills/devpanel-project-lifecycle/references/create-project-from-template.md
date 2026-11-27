@@ -14,7 +14,7 @@ A DevPanel catalog template is not the toolkit's local `templates/` directory.
 | Repository owner | User or org from `devpanel_list_git_owners` |
 | Repository name | User; must **not** exist yet |
 
-Quickclone deploys with the catalog's own configuration; it takes no CPU/PHP/MySQL inputs. If the user asks for specific server settings, say they cannot be set in this step; after deployment they are a separate `devpanel_plan_upgrade_application` request (and MySQL is cluster-level, see `devpanel-project-requirements.md`).
+Quickclone deploys with the catalog's own configuration; it takes no CPU/PHP/MySQL inputs. If the user asks for specific server settings, say they cannot be set in this step; after deployment `devpanel_get_application_config` shows what the catalog chose, and changing it is a separate `devpanel_plan_upgrade_application` request (and MySQL is cluster-level, see `devpanel-project-requirements.md`).
 
 ## Procedure
 
@@ -33,7 +33,7 @@ Quickclone deploys with the catalog's own configuration; it takes no CPU/PHP/MyS
    ```
    `isUsePersonalToken: true` is required: the server default (`false`, OAuth connection) used an expired credential in testing. Check the plan's warnings (new private repository, immediate deployment, testing-workspace limit of 3 running applications).
 7. **Approve and execute** per `execution-and-verification.md` §2.
-8. **Monitor.** The result carries `cloneActivityId` and the deploy `activityId`/`jobStatus`. If `cloneJobStatus` is not `SUCCESS`, poll `devpanel_get_activity` on `cloneActivityId`; DevPanel deploys only after the clone succeeds. Then poll the deploy activity (§4). Do not submit an activation unless the application is actually in `UNDEPLOY_APPLICATION_SUCCESS` after the jobs finish.
+8. **Monitor.** The result carries `cloneActivityId` and the deploy `activityId`/`jobStatus`. If `cloneJobStatus` is not `SUCCESS`, `devpanel_wait_for_activity` on `cloneActivityId`; DevPanel deploys only after the clone succeeds. Then wait for the deploy activity (§4). Do not submit an activation unless the application is actually in `UNDEPLOY_APPLICATION_SUCCESS` after the jobs finish.
 9. **Read back.**
    - `devpanel_list_projects` / `devpanel_get_project` → project ID, `repository` = `OWNER/NAME`, `catalogId` matches.
    - `devpanel_list_project_applications` → the `main` application; `devpanel_get_application` → status, `hostname`.
