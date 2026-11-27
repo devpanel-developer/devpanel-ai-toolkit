@@ -50,4 +50,4 @@ Reuse any of these the user already stated; do not ask again.
 
 - Create succeeded, activation rejected or failed: the project exists; report partial completion and the activation as the next step.
 - Activation job `ERROR`: read activity logs (missing Composer dependencies, wrong web root and wrong PHP image are common causes) and report. A new activation plan is possible only if the application returns to `UNDEPLOY_APPLICATION_SUCCESS`; changing settings on a deployed application is `devpanel_plan_upgrade_application` and needs a separate approval.
-- HTTP 500 or `install_required` after `SUCCESS`: code is deployed; the site may need its database. Importing an existing site's data is not supported by a verified mechanism (see `deploy-existing-site.md`); report it.
+- HTTP 500 or `install_required` after `SUCCESS`: code is deployed; the site may need its database. Importing an existing site's data is a separate step (see `deploy-existing-site.md`, Data migration); report it and do not start it unasked.

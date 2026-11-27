@@ -22,17 +22,19 @@ Read `references/execution-and-verification.md` first for every workflow, then t
 
 `references/devpanel-project-requirements.md` holds the verified server-configuration mappings (CPU/memory tiers, PHP images, MySQL) and Drupal file requirements. Read it before collecting server configuration or touching customer source.
 
+Other DevPanel tasks (backup and restore, custom domains, Basic Auth and members, project secrets, resizing, pause and delete, running a command, troubleshooting a site) are outside this skill. The DevPanel MCP server ships a guide for each as an MCP prompt (`/mcp__<server>__<task>` in Claude Code, e.g. `troubleshoot-site`); follow that guide and the shared rules below.
+
 If the request is ambiguous between workflows (e.g. "set up staging" could mean a branch environment, a sync, or both), ask which operation the user wants. Never combine workflows the user did not ask for.
 
 ## Shared rules
 
-1. **Approval protocol.** Every DevPanel mutation is a plan. Call `devpanel_approve_and_execute_plan` with `planId` only, show the returned `plan_text` verbatim, then stop and wait. Relay only the user's literal `APPROVE`/`REJECT` with that plan's `planHash`. The original workflow request is not approval of a plan the user has not seen. Never supply `decision` on the first call.
+1. **Approval protocol.** A `devpanel_plan_*` tool only creates a plan. Call `devpanel_approve_and_execute_plan` with `planId` only, show the returned `plan_text` verbatim, then stop and wait. Relay only the user's literal `APPROVE`/`REJECT` with that plan's `planHash`. The original workflow request is not approval of a plan the user has not seen. Never supply `decision` on the first call. A few change tools have no `plan_` in the name (`devpanel_backup_application`, `devpanel_unpause_application`, ...): they run as soon as they are called, with no approval step. Say what you are about to do before calling one, and call it only when the workflow or the user asks for it.
 2. **No automatic data sync.** Creating, activating or unpausing an application never triggers `devpanel_plan_sync_application`, and activation always passes `copyDatabaseFilesType: ""`. Sync only on an explicit user request for that operation.
 3. **Secrets stay out of the conversation.** Never ask for, accept, echo or store a GitHub token, DevPanel token or password. Never call `devpanel_set_git_token` yourself; direct the user to the setup helper or the DevPanel UI (see `references/execution-and-verification.md`). Never call `devpanel_get_project_secret` or `devpanel_get_backup_download_url` unless the user explicitly asks for that value.
 4. **Resolve, then reuse.** Resolve workspace, project, repository, branch and application to stable IDs before any mutation. Reuse matching resources; create only what is missing. If more than one candidate matches, ask the user to choose.
 5. **Use the verified tool for each step.** Quickclone for catalog templates (not quickstart); branch reconciliation (`devpanel_plan_sync_project_branches`) for branch applications in an existing project (not `devpanel_plan_create_application`). Do not invent tool parameters; check the live tool schema when unsure.
 6. **Server configuration is the user's choice.** Show supported options from `devpanel-project-requirements.md`, reuse choices the user already gave, and get an explicit selection before activation. Never rely on the MCP's stack-unaware activation defaults.
-7. **Verify outcomes.** Poll activities to a terminal state with a deadline, then load the site. A `SUCCESS` job is not proof the website works.
+7. **Verify outcomes.** Wait for activities to reach a terminal state (`devpanel_wait_for_activity`) with a deadline, check `devpanel_get_application_status`, then load the site. A `SUCCESS` job is not proof the website works.
 8. **Never force or delete as rollback.** No force-push, no branch reset, no automatic deletion or restore. Report partial completion and the next step instead.
 9. **Keep an execution record** with `${CLAUDE_SKILL_DIR}/scripts/exec-record.mjs` and finish with the report format in `execution-and-verification.md`.
 

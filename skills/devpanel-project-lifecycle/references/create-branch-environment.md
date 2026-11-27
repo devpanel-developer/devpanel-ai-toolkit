@@ -58,22 +58,22 @@ Use `gh`/Git only; DevPanel MCP's branch listing shows at most 50 branches and i
 
 ## 4. Activate or resume
 
-Read the application (`devpanel_get_application`) and follow the state table in `execution-and-verification.md` §3.
+Read the application (`devpanel_get_application`, `devpanel_get_application_config`) and follow the state table in `execution-and-verification.md` §3.
 
 For activation:
-1. Read an existing application of the project (e.g. the `main` one) with `devpanel_get_application` as a reference: it gives `webRoot` and `staticFiles`. Image, tier and storage are not returned by MCP — ask the user or have them check the DevPanel UI.
-2. Present the configuration options (`devpanel-project-requirements.md`) together with the reference values, and get the user's selection (unless they already gave it for this target).
+1. Read an existing application of the project (e.g. the `main` one) with `devpanel_get_application_config` as a reference: `runtime` gives `containerImage`, `capacity`, `capacityLimit`, `storageGi` and `groupType`; `paths` gives `appRoot`, `webRoot` and `staticFiles`. A `null` field was not reported by DevPanel; ask the user for it instead of guessing.
+2. Present the configuration options (`devpanel-project-requirements.md`) together with the reference values, offer to reuse them, and get the user's selection (unless they already gave it for this target). Reference values are a suggestion, not the user's choice.
 3. Map: `server-config.mjs map ...` (exit 3 → resolve first).
 4. `devpanel_plan_activate_application` with `workspaceId`, `application: <application ID>` and all mapped fields, including `capacityLimit`, `appRoot`, `webRoot`, `containerImage`, `storage`, `copyDatabaseFilesType: ""`. The plan must carry no generic-defaults warning.
 5. Approve and execute.
 
-Paused (`replicas` 0) → `devpanel_plan_unpause_application`. Already running → reuse, no activation, no runtime changes.
+Paused (`replicas` 0) → tell the user, then `devpanel_unpause_application` (runs at once, no approval). Already running → reuse, no activation, no runtime changes.
 
 The tested Drupal deployment used `drupalforge/drupal_cms:main` with `small_2` and an explicit web root. Those are examples for that project, not defaults.
 
 ## 5. Verify
 
-`execution-and-verification.md` §4–§5: activity to a terminal state, application re-read (project, branch, status, URL), `check-site.sh`. Report the branch SHA observed and that the deployed commit cannot be verified through MCP.
+`execution-and-verification.md` §4–§5: activity to a terminal state, application re-read (project, branch, status, URL), `devpanel_get_application_status`, `check-site.sh`. Report the branch SHA observed and that the deployed commit cannot be verified through MCP.
 
 A fresh branch application has no copy of another environment's database or files; `install_required` or an empty site is expected. Mention that `sync-environment-data.md` is available if they want data from another environment — but do not start it.
 

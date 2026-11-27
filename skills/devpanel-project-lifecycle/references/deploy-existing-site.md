@@ -1,6 +1,6 @@
 # Prepare an existing customer Drupal site for DevPanel
 
-Inspect the customer's Drupal source, determine what DevPanel needs, add only verified and authorized configuration, then reuse `create-project-from-repository.md`. Database and files migration is separate and currently has no verified import mechanism.
+Inspect the customer's Drupal source, determine what DevPanel needs, add only verified and authorized configuration, then reuse `create-project-from-repository.md`. Database and files migration is separate (see Data migration below).
 
 ## Evidence status (read first)
 
@@ -31,10 +31,12 @@ Therefore:
 
 ## Data migration (separate)
 
-Deploying source does not migrate the site's database or files. The DevPanel MCP documents no upload/import of a local database dump or files archive; backup download and restore apply only to backups the application itself made. Do not invent an automated import path (for example committing dumps into the repository, baking them into an image, or placing them in `.devpanel/dumps/`).
+Deploying source does not migrate the site's database or files. Backup download and restore apply only to backups the application itself made. Do not invent an import path (for example committing dumps into the repository, baking them into an image, or placing them in `.devpanel/dumps/`).
 
-The supported path is a **manual import by the user** in the application's VS Code terminal, following `docs/MANUAL-DATA-IMPORT.md` in the toolkit repository (public files go to `<webRoot>/sites/default/files`):
+The DevPanel MCP server has `devpanel_plan_import_file` (copies one file into `$APP_ROOT`) and `devpanel_plan_run_command`, but `sourcePath` is read on the **machine the MCP server runs on**. With the hosted server (`https://mcp.devpanel.com/mcp`, the toolkit default) the user's computer is not reachable, so that path does not apply. Only when the user runs the MCP server on the machine that holds the dump (stdio) can it be used: then follow the server's `import-local-data` prompt, on the user's explicit request. This toolkit has not tested it.
 
-1. After deployment, check the application `storage` against the files size the user reports (needs ≥ 2 × files + dump); propose an upgrade plan if it is too small.
+Otherwise the supported path is a **manual import by the user** in the application's VS Code terminal, following `docs/MANUAL-DATA-IMPORT.md` in the toolkit repository (public files go to `<webRoot>/sites/default/files`):
+
+1. After deployment, check the application's storage (`devpanel_get_application_config`, `runtime.storageGi`) against the files size the user reports (needs ≥ 2 × files + dump); propose an upgrade plan if it is too small.
 2. Give the user the guide and the application URL. Never ask for, accept or relay hosting credentials, dumps or download URLs.
 3. When the user says the data is imported, verify (`execution-and-verification.md` §5) and read HTTP logs on failure. Record "data imported manually by user" in the execution record.
